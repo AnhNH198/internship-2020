@@ -1,4 +1,6 @@
 # DaemonSet trong Kubernetes là gì ?
+![](images/DaemonSets2.png)
+
 DaemonSet là một dạng dịch vụ quản lý các Pod hoạt động với chức năng khá là riêng biệt bằng cách đảm bảo Pod dịch vụ sẽ được chạy trên toàn bộ các Node trong một Kubernetes Cluster (hoặc trên một số Node cụ thể trong Kubernetes Cluster).
 
 DaemonSet sử dụng Pod template, để định nghĩa các thông số cho pod dịch vụ mà bạn sẽ chạy như : sử dụng image gì, volume gì được mount, label, selectors,…
@@ -24,7 +26,7 @@ Bạn có thể chạy nhiều dịch vụ DaemonSet trong cùng một Node đ�
  - Push: ở cơ chế Push, thì các DaemonSet Pod thường được cấu hình để tự động thu thập dữ liệu và đẩy về 1 dịch vụ cố định. Nên cũng không có nhu cầu client nào giao tiếp hết.
 
   - NodeIP và known port: giống như khi deploy Prometheus Node Exporter, bạn sẽ cho DaemonSet Pods sử dụng hostPort và port IP cụ thể trên mỗi Node. Như vậy khi các service discovery sẽ lấy danh sách Kubernetes Node và giao tiếp với DaemonSet qua port mà bạn cấu hình.
-  - DNS: bạn cũng có thể giao tiếp với DaemonSet qua DNS endpoint đấy.
+  - DNS: bạn cũng có thể giao tiếp với DaemonSet qua DNS endpoint.
     Service: bạn cũng có thể cấu Service cho DaemonSet, từ đó client khi truy cập DaemonSet qua Service sẽ truy cập ngẫu nhiên một DaemonSet Pod trên ngẫu nhiên Node.
 
 -> Với DaemonSet, người ta hay cấu hình dịch vụ thu thập log tự động hoặc sử dụng NodeIP & Port như Prometheus Node Exporter hoac monitor.

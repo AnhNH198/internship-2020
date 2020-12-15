@@ -11,7 +11,7 @@
   - Service account và token controllers quản lý access management.
 
 ### etcd
-etcd là một simple distributed key valua store. Kubernetes sử dụng etcd như là database của nó và lưu trữ tất cả cluster data ở đây.
+etcd là một simple distributed key value store. Kubernetes sử dụng etcd như là database của nó và lưu trữ tất cả cluster data ở đây.
 
 Một vài thông tin có thể được lưu trữ như là, job scheduling info, Pod details, stage information, etc, ...
 

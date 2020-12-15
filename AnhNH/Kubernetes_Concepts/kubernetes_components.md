@@ -27,7 +27,9 @@ Nếu Kubernetes cluster của bạn sử dụng etcd như là backing store, đ
 
 Tìm hiểu sâu hơn về [etcd](https://etcd.io/docs/)
 ##### kube-scheduler
-Control Plane componet đảm nhiệm việc phát hiện Pods mới được tạo với no assigned node, và chọn node cho chúng chạy trên đó.
+![](images/sch.png)
+
+La 1 control Plane componet đảm nhiệm việc phát hiện Pods mới được tạo với no assigned node, và chọn node cho chúng chạy trên đó.
 
 Những yếu tố quyết định cho việc chọn scheduling:
 * individual và collective resources requirements
