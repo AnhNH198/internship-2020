@@ -7,7 +7,7 @@
 
 Biểu đồ bên dưới thể hiện một Kubernetes cluster với tất cả các Components kết nối với nhau
 
-![](images/kubernetes_components.png)
+![](images/kubernetes_c.png)
 
 ### Control Plane Components
 Control Plane Components đưa ra global decisions về cluster(ví dụ, scheduling) cũng như là phát hiện và phản hồi tới cluster events(ví dụ, khởi động pod mới khi một deployment's replicas field không đáp ứng được)
