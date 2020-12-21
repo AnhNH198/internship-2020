@@ -8,9 +8,11 @@ từ phiên bản Kubernetes 1.3, DNS là một built-in service được launch
 
 
 * Nhiều containers trong một pod không cần DNS service, chúng contact với nhau trực tiếp
-  - Container trong cùng một pods có thể kết nối với nhau sử dụng localhost:port
-  - Muốn DNS hoạt động, một pod cần phải được có Service definition
+  - Container trong cùng một pods có thể kết nối với nhau sử dụng localhost:
 
 ![](images/ex.png)
+
+* Nếu ta muốn connect một web service trong một opds tới database ở pod khác, ta cần sử dụng Service Discovery
+* Một pod luôn luôn cần có service definition -> chỉ khi ta tạo service cho một pod, thì pod mới có thể accessible, và Service Discovery sẽ hoạt động
 
 ![](images/how.png)
