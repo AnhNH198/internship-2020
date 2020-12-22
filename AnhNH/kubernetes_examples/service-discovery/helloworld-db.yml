@@ -21,7 +21,7 @@ spec:
           containerPort: 3000
         env:
           - name: MYSQL_HOST
-            value: database-service
+            value: database-service # using service discovery, pod will regconize this service(kubectl get services to see more)
           - name: MYSQL_USER
             value: root
           - name: MYSQL_PASSWORD
