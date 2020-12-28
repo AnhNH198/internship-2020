@@ -1,3 +1,6 @@
+# Kubernetes architecture
+![](images/archi2.png)
+
 ![architecture.png](images/architecture.png)
 
 ### Master Node
