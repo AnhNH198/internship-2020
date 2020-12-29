@@ -1,3 +1,6 @@
+# Kubernetes architecture
+![](images/archi2.png)
+
 ![architecture.png](images/architecture.png)
 
 ### Master Node
@@ -28,6 +31,7 @@ Worker node là node nơi mà ứng dụng(application) được triển khai. W
 - Nó mount và runs Pod volume, secrets. Nó xem trạng thái của Pod của Node và phản hồi về 		Master
 - Docker là một container native plaform làm việc với kubelet để chạy containers trên các Nodes
 
+![](images/worker.png)
 ### kubeproxy
 kube-proxy là Network Proxy và load balancer cho dịch vụ, trên một single worker node. Nó đảm nhiệm network routing cho TCP và UDP packets, và thực hiện connection forwarding.
 
