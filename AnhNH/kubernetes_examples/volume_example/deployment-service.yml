@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-with-volume
+spec:
+  selector:
+    app: volume-web
+  ports:
+  - name:  volume-web-service
+    port: 80
+    targetPort: 3000
+    protocol: TCP
+  type: LoadBalancer
