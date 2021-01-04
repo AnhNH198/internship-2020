@@ -5,9 +5,11 @@
 
  Worker nodes host các Pods là Components của application workload. Control plane quản lý worker nodes và pods trong cluster. Trong môi trường production, Control Plane thường chạy trên multiple computer và một cluster thương chạy multiple nodes, cung cấp fault-tolerance và high availability(HA)
 
-Biểu đồ bên dưới thể hiện một Kubernetes cluster với tất cả các Components kết nối với nhau
+Biểu đồ bên dưới thể hiện một Kubernetes cluster với tất cả các Components kết nối với nhau:
 
 ![](images/kubernetes_c.png)
+
+![](images/components.png)
 
 ### Control Plane Components
 Control Plane Components đưa ra global decisions về cluster(ví dụ, scheduling) cũng như là phát hiện và phản hồi tới cluster events(ví dụ, khởi động pod mới khi một deployment's replicas field không đáp ứng được)

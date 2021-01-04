@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hpa-example-service
+spec:
+  ports:
+    - name: hpa-example-service
+      port: 31001
+      nodePort: 32333
+      targetPort: http-port
+      protocol: TCP
+  selector:
+    app: hpa-example
+  type: NodePort

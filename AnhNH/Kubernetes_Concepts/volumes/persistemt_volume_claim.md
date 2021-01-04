@@ -12,6 +12,10 @@
 
 ![](images/pvc6.png)
 
+```
+
+```
+
 ### View Persistent Volume Claim (PVCs)
 ![](images/pvc7.png)
 

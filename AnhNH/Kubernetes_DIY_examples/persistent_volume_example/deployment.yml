@@ -1,4 +1,4 @@
-apiVersion: v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: volume-deploy
@@ -14,10 +14,17 @@ spec:
     spec:
       containers:
       - name:  web-with-volume
-        image: boploi/volume_example
+        image: boploi/volume_example:2
+        env:
+          - name: FOLDER_NAME
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-volume-cm
+                key: FOLDER_NAME
         volumeMounts:
           - name:  volume-web
-            mountPath: /app/story
+            mountPath: /app/variable_env
       volumes:
         - name: volume-web
-          emtyDir: {}
+          persistentVolumeClaim:
+            claimName: host-pvc
