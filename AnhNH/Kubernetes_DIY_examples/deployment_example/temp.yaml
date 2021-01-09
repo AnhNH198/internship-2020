@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-nodejs-demo
+spec:
+  selector:
+    app: nodejs-demo
+  ports:
+    - name: nodejs-demo
+      port: 3001
+      protocol: TCP
+      targetPort: 3000
+  type: LoadBalancer
