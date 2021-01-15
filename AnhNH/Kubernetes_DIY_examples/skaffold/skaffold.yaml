@@ -1,0 +1,9 @@
+apiVersion: skaffold/v1
+kind: Config
+build:
+  artifacts:
+  - image: boploi/skaffold-demo
+deploy:
+  kubectl:
+    manifests:
+      - k8s-*
