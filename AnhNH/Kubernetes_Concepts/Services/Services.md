@@ -1,4 +1,6 @@
-![](images/services1.png)
+![](../images/services2.png)
+
+![](../images/services1.png)
 # Services
 * Khi sử dụng Replication Controller, pods được terminated và được created trong quá trình scaling
 * Khi sử dụng Deployments, Khi updating image version, pods được terminated và pods mới sẽ thay thế cho pods cũ
