@@ -10,5 +10,5 @@ spec:
     - ReadWriteOnce
   storageClassName: standard
   hostPath:
-  path: /data/sonar-data
-  type: DirectoryOrCreate
+    path: /data/sonar-data
+    type: DirectoryOrCreate
