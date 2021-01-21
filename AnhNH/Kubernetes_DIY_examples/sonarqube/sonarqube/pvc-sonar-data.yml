@@ -3,9 +3,9 @@ kind: persistentVolumeClaim
 metadata:
   name: sonar-data-pvc
 spec:
-accessModes:
-- ReadWriteOnce
-storageClassName: standard
-resources:
-  requests:
-    storage: 10Gi
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: standard
+  resources:
+    requests:
+      storage: 10Gi
