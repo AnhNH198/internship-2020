@@ -1,0 +1,1 @@
+[emptyDir trong Kubernetes](https://cuongquach.com/tim-hieu-storage-volume-emptydir-kubernetes.html)

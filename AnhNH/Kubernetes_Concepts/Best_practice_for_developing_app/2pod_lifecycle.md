@@ -158,26 +158,21 @@ something like this:
 **$ kubectl exec my-pod cat logfile.txt**
 If the container gets restarted for whatever reason (including because the hook failed), the file may be gone before you can examine it. You can work around that by mounting an emptyDir volume into the container and having the hook write to it.
 ### 4.2 PRE-STOP CONTAINER LIFECYCLE HOOK
-A pre-stop hook is executed immediately before a container is terminated. When a
-container needs to be terminated, the Kubelet will run the pre-stop hook, if config-
-ured, and only then send a SIGTERM to the process (and later kill the process if it
-doesn’t terminate gracefully).
-A pre-stop hook can be used to initiate a graceful shutdown of the container, if it
-doesn’t shut down gracefully upon receipt of a SIGTERM signal. They can also be used
-to perform arbitrary operations before shutdown without having to implement those
-operations in the application itself (this is useful when you’re running a third-party
-app, whose source code you don’t have access to and/or can’t modify).
-Configuring a pre-stop hook in a pod manifest isn’t very different from adding a
-post-start hook. The previous example showed a post-start hook that executes a command, so we’ll look at a pre-stop hook that performs an HTTP GET request now. The
-following listing shows how to define a pre-stop HTTP GET hook in a pod.
+A pre-stop hook is executed **immediately before a container is terminated**. 
+
+When a container needs to be terminated, the **Kubelet** will run the pre-stop hook, if configured, and only then send a SIGTERM to the process (and later kill the process if it doesn’t terminate gracefully).
+
+A **pre-stop hook** can be **used to initiate a graceful shutdown** of the container, if it doesn’t shut down gracefully upon receipt of a SIGTERM signal. They can also be used to perform arbitrary operations before shutdown without having to implement those operations in the application itself (this is useful when you’re running a third-party app, whose source code you don’t have access to and/or can’t modify). 
+
+Configuring a pre-stop hook in a pod manifest isn’t very different from adding a post-start hook. The previous example showed a post-start hook that executes a command, so we’ll look at a pre-stop hook that performs an HTTP GET request now. The following listing shows how to define a pre-stop HTTP GET hook in a pod.
 ![](../images/podlife10.png)
 
 The pre-stop hook defined in this listing performs an HTTP GET request to http://
 POD_IP:8080/shutdown as soon as the Kubelet starts terminating the container.
 Apart from the port and path shown in the listing, you can also set the fields scheme
 (HTTP or HTTPS) and host , as well as httpHeaders that should be sent in the
-request. The host field defaults to the pod IP. Be sure not to set it to localhost,
-because localhost would refer to the node, not the pod.
+request. The host field defaults to the pod IP. Be sure not to set it to **localhost**,
+because **localhost** would **refer to the node, not the pod.**
 In contrast to the post-start hook, the container will be terminated regardless of
 the result of the hook—an error HTTP response code or a non-zero exit code when
 using a command-based hook will not prevent the container from being terminated.
@@ -194,44 +189,31 @@ nessed situations where the pre-stop hook didn’t run and the developer
 wasn’t even aware of that.
 ```
 ### 4.3 USING A PRE-STOP HOOK BECAUSE YOUR APP DOESN'T RECEIVE THE "SIGTERM" SIGNAL
-Many developers make the mistake of defining a pre-stop hook solely to send a SIGTERM
-signal to their apps in the pre-stop hook. They do this because they don’t see their appli-
-cation receive the SIGTERM signal sent by the Kubelet. The reason why the signal isn’t
-received by the application isn’t because Kubernetes isn’t sending it, but because the sig-
-nal isn’t being passed to the app process inside the container itself. If your container
-image is configured to run a shell, which in turn runs the app process, the signal may be
-eaten up by the shell itself, instead of being passed down to the child process.
-In such cases, instead of adding a pre-stop hook to send the signal directly to your
-app, the proper fix is to make sure the shell passes the signal to the app. This can be
-achieved by handling the signal in the shell script running as the main container pro-
-cess and then passing it on to the app. Or you could not configure the container image
-to run a shell at all and instead run the application binary directly. You do this by using
-the exec form of ENTRYPOINT or CMD in the Dockerfile: ENTRYPOINT ["/mybinary"]
-instead of ENTRYPOINT /mybinary .
-A container using the first form runs the mybinary executable as its main process,
-whereas the second form runs a shell as the main process with the mybinary process
-executed as a child of the shell process.
+Many developers make the mistake of defining a pre-stop hook solely to send a SIGTERM signal to their apps in the pre-stop hook. They do this because they don’t see their application receive the SIGTERM signal sent by the Kubelet. 
+
+The reason why the signal isn’t received by the application isn’t because Kubernetes isn’t sending it, but because the **signal isn’t being passed to the app process inside the container itself**. If your container image is configured to run a shell, which in turn runs the app process, the **signal may be eaten up by the shell itself**, instead of being passed down to the child process.
+In such cases, instead of adding a pre-stop hook to send the signal directly to your app, the **proper fix is to make sure the shell passes the signal to the app**. 
+
+This **can be achieved by handling the signal in the shell script running as the main container process and then passing it on to the app**. Or you could **not configure the container image to run a shell at all** and **instead run the application binary directly**. You do this by using the **exec form of ENTRYPOINT or CMD** in the **Dockerfile**: **ENTRYPOINT ["/mybinary"]** instead of ENTRYPOINT /mybinary.
+
+A container using the **first** form runs the mybinary executable **as its main process**,
+whereas the **second** form runs a shell as the main process with the mybinary process executed as a child of the shell process.
 
 ### 4.5 UNDERSTANDING THAT LIFECYCLE HOOKS TARGET CONTAINERS, NOT PODS
-As a final thought on post-start and pre-stop hooks, let me emphasize that these lifecy-
-cle hooks relate to containers, not pods. You shouldn’t use a pre-stop hook for run-
-ning actions that need to be performed when the pod is terminating. The reason is
-that the pre-stop hook gets called when the container is being terminated (most likely
-because of a failed liveness probe). This may happen multiple times in the pod’s life-
-time, not only when the pod is in the process of being shut down
+As a final thought on post-start and pre-stop hooks, let me emphasize that these lifecycle hooks relate to containers, not pods. 
+
+You **shouldn’t use a pre-stop hook for running actions that need to be performed when the pod is terminating**. 
+The reason is that the pre-stop hook gets called when the container is being terminated (**most** likely because of a failed **liveness probe**). This may happen multiple times in the pod’s life-time, not only when the pod is in the process of being shut down
 ## 5. Understanding Pod shutdown
-We’ve touched on the subject of pod termination, so let’s explore this subject in more
-detail and go over exactly what happens during pod shutdown. This is important for
-understanding how to cleanly shut down an application running in a pod.
-Let’s start at the beginning. A pod’s shut-down is triggered by the deletion of the
-Pod object through the API server. Upon receiving an HTTP DELETE request, the
-API server doesn’t delete the object yet, but only sets a deletionTimestamp field in it.
-Pods that have the deletionTimestamp field set are terminating.
-Once the Kubelet notices the pod needs to be terminated, it starts terminating
-each of the pod’s containers. It gives each container time to shut down gracefully, but
-the time is limited. That time is called the termination grace period and is configu-
-rable per pod. The timer starts as soon as the termination process starts. Then the fol-
-lowing sequence of events is performed:
+We’ve touched on the subject of pod termination, so let’s explore this subject in more detail and go over exactly what happens during pod shutdown. 
+
+This is important for understanding how to cleanly shut down an application running in a pod. 
+Let’s start at the beginning. A pod’s shut-down is **triggered** by the deletion of the Pod object **through the API server**. **Upon receiving** an **HTTP DELETE request**, the A**PI server doesn’t delete the object yet, but only sets a deletionTimestamp field in it**.
+
+Pods that have the **deletionTimestamp** field set are **terminating**.
+Once the **Kubelet** **notices** the **pod** **needs to be terminated**, it starts terminating **each of the pod’s containers**. 
+
+It gives each container time to shut down gracefully, but the time is limited. That time is called the termination grace period and is configurable per pod. The timer starts as soon as the termination process starts. Then the following sequence of events is performed:
 1. Run the pre-stop hook, if one is configured, and wait for it to finish.
 2. Send the SIGTERM signal to the main process of the container.
 3. Wait until the container shuts down cleanly or until the termination grace period runs out.
@@ -239,12 +221,10 @@ lowing sequence of events is performed:
 ![](../images/podlife11.png)
 ### 5.1 SPECIFYING THE TERMINATION GRACE PERIOD
 The termination grace period can be configured in the pod spec by setting the spec.
-terminationGracePeriodSeconds field. It defaults to 30, which means the pod’s con-
-tainers will be given 30 seconds to terminate gracefully before they’re killed forcibly.
+**terminationGracePeriodSeconds** field. It **defaults** to 30, which means the pod’s containers will be given 30 seconds to terminate **gracefully** before they’re killed **forcibly**.
 ```
 TIP
-You should set the grace period to long enough so your process can fin-
-ish cleaning up in that time.
+You should set the grace period to long enough so your process can finish cleaning up in that time.
 ```
 The grace period specified in the pod spec can also be overridden when deleting the
 pod like this:
@@ -258,59 +238,38 @@ without waiting for confirmation, by setting the grace period to zero and adding
 
 **$ kubectl delete po mypod --grace-period=0 --force**
 
-Be careful when using this option, especially with pods of a StatefulSet. The Stateful-
+Be careful when using this option, **especially with pods of a StatefulSet**. The Stateful-
 Set controller takes great care to never run two instances of the same pod at the same
 time (two pods with the same ordinal index and name and attached to the same
-PersistentVolume). By force-deleting a pod, you’ll cause the controller to create a
-replacement pod without waiting for the containers of the deleted pod to shut
-down. In other words, two instances of the same pod might be running at the same
-time, which may cause your stateful cluster to malfunction. Only delete stateful pods
-forcibly when you’re absolutely sure the pod isn’t running anymore or can’t talk to
-the other members of the cluster (you can be sure of this when you confirm that the
-node that hosted the pod has failed or has been disconnected from the network and
-can’t reconnect).
+PersistentVolume). By force-deleting a pod, **you’ll cause the controller to create a replacement pod without waiting for the containers of the deleted pod to shut down**. 
+
+In other words, **two instances of the same pod might be running at the same time**, which may **cause your stateful cluster to malfunction**. 
+
+Only **delete** **stateful** pods **forcibly** when you’re **absolutely sure the pod isn’t running anymore** or **can’t talk to the other members of the cluster** (you can be **sure** of this **when you confirm that the node that hosted the pod has failed** or **has been disconnected** from the network and can’t reconnect).
+
 Now that you understand how containers are shut down, let’s look at it from the
 application’s perspective and go over how applications should handle the shutdown
 procedure.
 ### 5.2 IMPLEMENTING THE PROPER SHUTDOWN HANDLER IN YOUR APPLICATION
-Applications should react to a SIGTERM signal by starting their shut-down procedure
-and terminating when it finishes. Instead of handling the SIGTERM signal, the applica-
-tion can be notified to shut down through a pre-stop hook. In both cases, the app
-then only has a fixed amount of time to terminate cleanly.
-But what if you can’t predict how long the app will take to shut down cleanly? For
-example, imagine your app is a distributed data store. On scale-down, one of the pod
-instances will be deleted and therefore shut down. In the shut-down procedure, the pod needs to migrate all its data to the remaining pods to make sure it’s not lost.
-Should the pod start migrating the data upon receiving a termination signal (through
-either the SIGTERM signal or through a pre-stop hook)?
-Absolutely not! This is not recommended for at least the following two reasons:
+Applications should react to a SIGTERM signal by starting their shut-down procedure and terminating when it finishes. Instead of handling the SIGTERM signal, the application can be notified to shut down through a pre-stop hook. In both cases, the app then **only has a fixed amount of time to terminate cleanly.**
+But what if you can’t predict how long the app will take to shut down cleanly? 
+
+For example, imagine your app is a distributed data store. On scale-down, one of the pod instances will be deleted and therefore shut down. **In the shut-down procedure, the pod needs to migrate all its data to the remaining pods to make sure it’s not lost.**
+
+Should the pod start migrating the data upon receiving a termination signal (through either the SIGTERM signal or through a pre-stop hook)?
+**Absolutely not!** This is not recommended for at least the following two reasons:
 *   A container terminating doesn’t necessarily mean the whole pod is being terminated.
 *   You have no guarantee the shut-down procedure will finish before the process is killed.
-This second scenario doesn’t happen only when the grace period runs out before the
-application has finished shutting down gracefully, but also when the node running
-the pod fails in the middle of the container shut-down sequence. Even if the node
-then starts up again, the Kubelet will not restart the shut-down procedure (it won’t
-even start up the container again). There are absolutely no guarantees that the pod
-will be allowed to complete its whole shut-down procedure.
+This second scenario doesn’t happen only when the grace period runs out before the application has finished shutting down gracefully, but also when the node running the pod fails in the middle of the container shut-down sequence. Even if the node then starts up again, the Kubelet will not restart the shut-down procedure (it won’t even start up the container again). There are absolutely no guarantees that the pod will be allowed to complete its whole shut-down procedure.
 ### 5.3 REPLACING CRITICAL SHUT-DOWN PROCEDURES WITH DEDICATED SHUT-DOWN PROCEDURE PODS
-How do you ensure that a critical shut-down procedure that absolutely must run to
-completion does run to completion (for example, to ensure that a pod’s data is
-migrated to other pods)?
-One solution is for the app (upon receipt of a termination signal) to create a new
-Job resource that would run a new pod, whose sole job is to migrate the deleted pod’s
-data to the remaining pods. But if you’ve been paying attention, you’ll know that you
-have no guarantee the app will indeed manage to create the Job object every single
-time. What if the node fails exactly when the app tries to do that?
-The proper way to handle this problem is by having a dedicated, constantly run-
-ning pod that keeps checking for the existence of orphaned data. When this pod finds
-the orphaned data, it can migrate it to the remaining pods. Rather than a constantly
-running pod, you can also use a CronJob resource and run the pod periodically.
-You may think StatefulSets could help here, but they don’t. As you’ll remember,
-scaling down a StatefulSet leaves PersistentVolumeClaims orphaned, leaving the data
-stored on the PersistentVolume stranded. Yes, upon a subsequent scale-up, the Persistent-
-Volume will be reattached to the new pod instance, but what if that scale-up never
-happens (or happens after a long time)? For this reason, you may want to run a
-data-migrating pod also when using StatefulSets (this scenario is shown in figure 17.6).
-To prevent the migration from occurring during an application upgrade, the data-
-migrating pod could be configured to wait a while to give the stateful pod time to
-come up again before performing the migration.
+How do you ensure that a critical shut-down procedure that absolutely must run to completion does run to completion (for example, to ensure that a pod’s data is migrated to other pods)?
+
+One **solution** is for the app (upon receipt of a termination signal) to create a new Job resource that would run a new pod, whose sole job is to **migrate the deleted pod’s data to the remaining pods**. But if you’ve been paying attention, you’ll know that you have no guarantee the app will indeed manage to create the Job object every single time. What if the node fails exactly when the app tries to do that?
+
+The **proper way to handle this problem is by having a dedicated, constantly running pod that keeps checking for the existence of orphaned data**. 
+When this pod **finds the orphaned data**, it can **migrate it to the remaining pods**. 
+Rather than a constantly running pod, you can also use a **CronJob** resource and **run the pod periodically**. You may think StatefulSets could help here, but they don’t. 
+As you’ll remember,**scaling down a StatefulSet** leaves **PersistentVolumeClaims orphaned**, leaving the data stored on the PersistentVolume stranded. Yes, upon a subsequent scale-up, the Persistent-
+Volume will be reattached to the new pod instance, but what if that scale-up never happens (or happens after a long time)? For this reason, you may want to run a data-migrating pod also when using StatefulSets (this scenario is shown in figure 17.6).
+To prevent the migration from occurring during an application upgrade, the data-migrating pod could be configured to wait a while to give the stateful pod time to come up again before performing the migration.
 ![](../images/podlife12.png)
