@@ -27,12 +27,12 @@ spec:
           env:
             - name: SONARQUBE_JDBC_USERNAME
               valueFrom:
-                secretKeyref:
+                secretKeyRef:
                   name: postgres-sonarqube
                   key: username
             - name: SONARQUBE_JDBC_PASSWORD
               valueFrom:
-                secretKeyref:
+                secretKeyRef:
                   name:  postgres-sonarqube
                   key: password
             - name: SONARQUBE_JDBC_URL
