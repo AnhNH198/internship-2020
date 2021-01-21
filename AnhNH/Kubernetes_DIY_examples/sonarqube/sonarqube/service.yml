@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sonarqube-service
+  labels:
+    app: sonarqube
+spec:
+  ports:
+  - protocol: TCP
+    name: sonarqube
+    nodePort: 32001
+    targetPort: 9000
+    port: 9001
+  type: NodePort
+  selector:
+    app: sonarqube

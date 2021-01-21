@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: sonar-extension
+  name: sonar-extension-pvc
   namespace: default
 spec:
   storageClassName: standard

@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: postgresdb-service
+  name: postgresdb
   labels:
     app: sonarqube
     db: postgres

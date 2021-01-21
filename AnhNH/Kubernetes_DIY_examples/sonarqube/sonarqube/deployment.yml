@@ -6,7 +6,8 @@ metadata:
   name: sonarqube
 spec:
   selector:
-    app: sonarqube
+    matchLabels:
+      app: sonarqube
   replicas: 1
   template:
     metadata:
@@ -15,7 +16,7 @@ spec:
     spec:
       containers:
         - name: sonarqube
-          image: sonarqube:7.1
+          image: sonarqube:latest
           resources:
             requests:
               cpu: 500m
@@ -23,4 +24,31 @@ spec:
             limits:
               cpu: 2000m
               memory: 2048Mi
-    
+          env:
+            - name: SONARQUBE_JDBC_USERNAME
+              valueFrom:
+                secretKeyref:
+                  name: postgres-sonarqube
+                  key: username
+            - name: SONARQUBE_JDBC_PASSWORD
+              valueFrom:
+                secretKeyref:
+                  name:  postgres-sonarqube
+                  key: password
+            - name: SONARQUBE_JDBC_URL
+              value: "jdbc:postgresql://postgresdb:5432/sonardb"
+          ports:
+          - containerPort: 9000
+            protocol: TCP
+          volumeMounts:
+            - mountPath: /opt/sonarqube/data/
+              name: sonarqube-data
+            - mountPath: /opt/sonarqube/extensions/
+              name: sonarqube-extensions
+      volumes:
+        - name: sonarqube-data
+          persistentVolumeClaim:
+            claimName: sonar-data-pvc
+        - name: sonarqube-extensions
+          persistentVolumeClaim:
+            claimName: sonar-extension-pvc
