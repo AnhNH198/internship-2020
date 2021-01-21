@@ -19,8 +19,8 @@ spec:
           image: sonarqube:latest
           resources:
             requests:
-              cpu: 1000m
-              memory: 2048Mi
+              cpu: 500m
+              memory: 1024Mi
             limits:
               cpu: 2000m
               memory: 2048Mi
