@@ -1,7 +1,7 @@
 # Prometheus Configuration
 *   Configuration is stored in the Prometheus configuration file, in yaml format
     *   Configuration file can be changed and applied, without having to restart Prometheus
-        *   A reload can be done by executin kill -SIGHUP <pid> (just reload configuration)
+        *   A reload can be done by executing **kill -SIGHUP <pid>** (just reload configuration)
 
 *   You can also pass parameters (flags) at **startup time** to ./prometheus
     *   Those parameters cannot be changed without restarting Prometheus
